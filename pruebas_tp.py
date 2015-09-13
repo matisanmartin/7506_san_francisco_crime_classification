@@ -3,92 +3,96 @@ import csv
 import math
 import operator
 
-#Script de pruebas para prototipar TP
 
-def obtenerdistancia(x1,y1,x2,y2):
-    return math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
+# Script de pruebas para prototipar TP
 
+# Calcula la distancia
+def get_distance(x1, y1, x2, y2):
+    return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+
+
+
+# Apertura y lectura del archivo csv usando keys definidas en fields
+
+dataRowsDic = []
 fields = ['Dates', 'Category', 'Descript', 'DayOfWeek', 'PdDistrict', 'Resolution', 'Address', 'X', 'Y']
 
-#Apertura y lectura del archivo csv usando keys definidas en fields
-listaDatos =[]
 with open('train.csv', 'rb') as train_file:
-    lectorArchivoTrain = csv.DictReader(train_file, fieldnames = fields)
-    header = lectorArchivoTrain.next()
-    #dato = lectorArchivoTrain.next()
+    trainData = csv.DictReader(train_file, fieldnames=fields)
+    header = trainData.next()
 
-    #Ejemplo de acceso a un row de datos
-    #print "%s %s" %(dato['Dates'], dato['Category'])
+    # Ejemplo de acceso a un row de datos
+    # dato = lectorArchivoTrain.next()
+    # print "%s %s" %(dato['Dates'], dato['Category'])
 
-    it = iter(lectorArchivoTrain)
+    it = iter(trainData)
 
     for i in it:
-        listaDatos.append(i)
+        dataRowsDic.append(i)
 
-dic_cant_delitos = {}
+#  Genera una lista de diccionarios {'Category':nroCrimenes}
 
-for i in range(0,len(listaDatos)):
+numberOfCrimes = {}
 
-    delito = listaDatos[i]['Category']
+for i in range(0, len(dataRowsDic)):
 
-    if(dic_cant_delitos.has_key(delito)):
-        cant = dic_cant_delitos.get(delito)
-        cant = cant+1
-        dic_cant_delitos[delito] = cant
+    delito = dataRowsDic[i]['Category']
+
+    if (numberOfCrimes.has_key(delito)):
+        cant = numberOfCrimes.get(delito)
+        cant = cant + 1
+        numberOfCrimes[delito] = cant
     else:
-        dic_cant_delitos[delito] = 1
+        numberOfCrimes[delito] = 1
 
+# Genera una lista con las distancias de cada punto al punto de referencia
 
+distancesToRef = []
 
-#Procesamiento
+xRef = float(dataRowsDic[75000]['X'])
+yRef = float(dataRowsDic[75000]['Y'])
 
-listaDistancias = []
+for i in range(0, len(dataRowsDic)):
 
-xref = float(listaDatos[75000]['X'])
-yref = float(listaDatos[75000]['Y'])
+    x1 = float(dataRowsDic[i]['X'])
+    y1 = float(dataRowsDic[i]['Y'])
 
-for i in range(0,len(listaDatos)):
+    distancia = get_distance(xRef, yRef, x1, y1)
 
-    x1=float(listaDatos[i]['X'])
-    y1=float(listaDatos[i]['Y'])
+    dic = {'X': x1, 'Y': y1, 'Distance': distancia, 'Category': dataRowsDic[i]['Category']}
 
-    distancia = ObtenerDistancia(xref,yref,x1,y1)
+    distancesToRef.append(dic)
 
-    dic = {'X':x1, 'Y':y1, 'Distancia':distancia, 'Category':listaDatos[i]['Category']}
+sortedDistances = sorted(distancesToRef, key=lambda k: k['Distance'])
 
-    listaDistancias.append(dic)
+crimesWeight = {}
 
-lista_ordenada = sorted(listaDistancias, key=lambda k: k['Distancia'])
+# peso=(distanciaLejano-distanciaActual)/(distanciaLejando-distanciaCercano)
 
-dic_delitos={}
+nearestPoint = sortedDistances[1]['Distance']
+fartherPoint = sortedDistances[1000]['Distance']
 
-#peso=(distanciaLejano-distanciaActual)/(distanciaLejando-distanciaCercano)
+for i in range(1, 1000):
 
-distanciaMasCercano = lista_ordenada[1]['Distancia']
-distanciaMasLejano = lista_ordenada[1000]['Distancia']
+    crimeCategory = sortedDistances[i]['Category']
+    distance = sortedDistances[i]['Distance']
 
-for i in range(1,1000):
+    weight = (fartherPoint - distance) / (fartherPoint - nearestPoint)
 
-    delito = lista_ordenada[i]['Category']
-    distancia = lista_ordenada[i]['Distancia']
-
-    peso = (distanciaMasLejano-distancia)/(distanciaMasLejano-distanciaMasCercano)
-
-    if(dic_delitos.has_key(delito)):
-        pesoTotal = dic_delitos.get(delito)
-        pesoTotal = pesoTotal+peso
-        dic_delitos[delito]=pesoTotal
+    if (crimesWeight.has_key(crimeCategory)):
+        pesoTotal = crimesWeight.get(crimeCategory)
+        pesoTotal = pesoTotal + weight
+        crimesWeight[crimeCategory] = pesoTotal
     else:
-        dic_delitos[delito]=peso
+        crimesWeight[crimeCategory] = weight
 
-
-print max(dic_delitos.iteritems(), key=operator.itemgetter(1))
-print dic_delitos
+print max(crimesWeight.iteritems(), key=operator.itemgetter(1))
+print crimesWeight
 
 # datosMapeados = map(lambda x:[x['Category'],1],listaDatos)
 # datosReducidos = reduce(lambda x,y:if(x[0]==y[0]))
 # print datosMapeados
-#Escritura de archivo de salida
+# Escritura de archivo de salida
 
 """
 with open('salida.csv','wb') as salida_file:
@@ -102,6 +106,3 @@ print listaDatos[0]
 print listaDatos[1]
 """
 print "termine"
-
-#prueba223445
-
