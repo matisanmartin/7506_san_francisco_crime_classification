@@ -16,7 +16,8 @@ def get_distance(x1, y1, x2, y2):
 # Apertura y lectura del archivo csv usando keys definidas en fields
 
 dataRowsDic = []
-fields = ['Dates', 'Category', 'Descript', 'DayOfWeek', 'PdDistrict', 'Resolution', 'Address', 'X', 'Y']
+fields = [  'Dates', 'Category', 'Descript', 'DayOfWeek', 'PdDistrict', 
+            'Resolution', 'Address', 'X', 'Y']
 
 with open('train.csv', 'rb') as train_file:
     trainData = csv.DictReader(train_file, fieldnames=fields)
@@ -69,7 +70,8 @@ for i in range(0, len(dataRowsDic)):
 
     distancia = get_distance(xRef, yRef, x1, y1)
 
-    dic = {'X': x1, 'Y': y1, 'Distance': distancia, 'Category': dataRowsDic[i]['Category']}
+    dic = { 'X': x1, 'Y': y1, 'Distance': distancia, 
+            'Category': dataRowsDic[i]['Category']}
 
     distancesToRef.append(dic)
 
