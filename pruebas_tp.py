@@ -2,6 +2,7 @@ __author__ = 'Matias'
 import csv
 import math
 import operator
+import matplotlib.pyplot as plt
 
 
 # Script de pruebas para prototipar TP
@@ -36,17 +37,26 @@ numberOfCrimes = {}
 
 for i in range(0, len(dataRowsDic)):
 
-    delito = dataRowsDic[i]['Category']
+    crime = dataRowsDic[i]['Category']
 
-    if (numberOfCrimes.has_key(delito)):
-        cant = numberOfCrimes.get(delito)
+    if (numberOfCrimes.has_key(crime)):
+        cant = numberOfCrimes.get(crime)
         cant = cant + 1
-        numberOfCrimes[delito] = cant
+        numberOfCrimes[crime] = cant
     else:
-        numberOfCrimes[delito] = 1
+        numberOfCrimes[crime] = 1
+
+
+print numberOfCrimes
+
+plt.barh(range(len(numberOfCrimes)),numberOfCrimes.values(), height=1)
+plt.yticks(range(len(numberOfCrimes)), list(numberOfCrimes.keys()))
+plt.xlabel('Cantidad de crimenes')
+plt.ylabel('Categoria de crimen')
+plt.show()
+
 
 # Genera una lista con las distancias de cada punto al punto de referencia
-
 distancesToRef = []
 
 xRef = float(dataRowsDic[75000]['X'])
